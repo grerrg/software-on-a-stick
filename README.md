@@ -1,5 +1,9 @@
 # software-on-a-stick
 run software in OCI images as if they were natively installed.
+or just my dockerfiles. heavily inspired by 
+https://github.com/jessfraz/dockerfiles
+which she featured in this video
+https://www.youtube.com/watch?v=cYsVvV1aVss
 
 ## about
 
