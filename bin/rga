@@ -1,0 +1,26 @@
+#!/bin/sh
+# build the container if not present
+if ! (docker inspect $USER/rga 2>/dev/null 1>&2) ; then
+	docker build -t $USER/rga /usr/local/share/dockerfiles/jq > /dev/null
+fi
+# $RM_IT will be expanded into separate words without quotes
+# we want the volume options to stay as a single word
+RM_IT="--rm"
+if [ -t 0 ]; then
+	RM_IT="$RM_IT -it"
+else
+	RM_IT="$RM_IT -i"
+fi
+UID=$(id -u $(logname))
+GID=$(id -g $(logname))
+if [ -f ./docker_env ]; then
+	DOCKER_ENV="--env-file docker_env"
+fi
+docker run \
+	$DOCKER_ENV \
+	$RM_IT \
+	-u "$UID:$GID" \
+	-w "$PWD" \
+	-v "$PWD:$PWD" \
+	"$USER/rga" \
+	"$@"
