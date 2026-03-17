@@ -17,7 +17,9 @@ although after switching to `nixos` (and `devenv`), i've never really had any us
 
 TODO WIP TBD
 
-## an example
+### exmaples
+
+### building with dockerfiles
 
 let's take `rga` for an example.
 
@@ -69,6 +71,43 @@ docker run \
 4. make the script executable:
 ```sh
 $ sudo chmod +x /usr/local/bin/rga
+```
+
+### building with eof dockerfiles
+
+just create a script in $PATH
+
+```shell
+#!/bin/sh
+# build the container if not present
+if ! (docker inspect $USER/rga 2>/dev/null 1>&2) ; then
+	docker build -t $USER/rga - <<'EOF' > /dev/null
+FROM nixos/nix
+RUN nix-env -iA nixpkgs.ripgrep-all
+ENTRYPOINT ["rga", "--rga-no-cache"]
+EOF
+fi
+# $RM_IT will be expanded into separate words without quotes
+# we want the volume options to stay as a single word
+RM_IT="--rm"
+if [ -t 0 ]; then
+	RM_IT="$RM_IT -it"
+else
+	RM_IT="$RM_IT -i"
+fi
+UID=$(id -u $(logname))
+GID=$(id -g $(logname))
+if [ -f ./docker_env ]; then
+	DOCKER_ENV="--env-file docker_env"
+fi
+docker run \
+	$DOCKER_ENV \
+	$RM_IT \
+	-u "$UID:$GID" \
+	-w "$PWD" \
+	-v "$PWD:$PWD" \
+	"$USER/rga" \
+	"$@"
 ```
 
 
